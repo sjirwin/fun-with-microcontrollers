@@ -9,6 +9,7 @@ class Location():
     long: float
     tzid: str
 
+
 @dataclass
 class DawnTimes():
     astronomical_twilight_begin: datetime.datetime
@@ -56,6 +57,7 @@ def sunevents(date: datetime.date, loc: Location) -> SunEvents:
         twilight,
         data['day_length']
     )
+
 
 def _sunrise_sunset_json(date: datetime.date, loc: Location):
     # time_data = _call_api_sunrise_sunset_org(str(date), loc.lat, loc.long, loc.tzid)
