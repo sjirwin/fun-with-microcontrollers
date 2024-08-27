@@ -9,13 +9,13 @@ from adafruit_display_shapes.arc import Arc
 from adafruit_display_shapes.circle import Circle
 from adafruit_display_shapes.line import Line
 
-import display_ili9341
+import my_display
 from location import Location
-import rtc_ds3231
+import my_rtc
 import sun_events
 
 
-date = rtc_ds3231.current_date(board.I2C())
+date = my_rtc.current_date(board.I2C())
 
 # Brooklyn, NY, USA
 loc = Location(40.6928, -73.9903, 'America/New_York')
@@ -77,7 +77,7 @@ arc_colors = [BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, LIGHT_GREY, GREY, DARK_
 displayio.release_displays()
 
 # connect to the display
-display = display_ili9341.get_display(board)
+display = my_display.get_display(board)
 
 # center of the display
 w2 = display.width // 2
@@ -118,7 +118,7 @@ for color, direction, angle in zip(arc_colors, arc_directions, arc_angles):
     )
     group.append(arc)
 
-now = rtc_ds3231.current_time()
+now = my_rtc.current_time()
 secs_now = now.tm_sec + 60 * (now.tm_min + 60 * now.tm_hour)
 now_angle = 2 * math.pi * secs_now / TOTAL_SECONDS # radians
 x0 = int((0.9 * radius) * math.cos(now_angle)) + w2
