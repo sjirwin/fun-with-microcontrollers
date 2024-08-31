@@ -1,5 +1,5 @@
 import displayio
-import adafruit_ili9341
+import adafruit_hx8357
 
 
 def get_display(board):
@@ -8,17 +8,17 @@ def get_display(board):
     tft_cs = board.D9 # Chip Select pin for the display
     tft_dc = board.D10 # Data/Command pin for the display
 
-    # connect to the dispaly
+    # connect to the display
     display_bus = displayio.FourWire(
         spi,
         command=tft_dc,
         chip_select=tft_cs,
     )
 
-    display_width = 320
-    display_height = 240
+    display_width = 480
+    display_height = 320
 
-    display = adafruit_ili9341.ILI9341(display_bus, width=display_width, height=display_height)
+    display = adafruit_hx8357.HX8357(display_bus, width=display_width, height=display_height)
 
     return display
 
