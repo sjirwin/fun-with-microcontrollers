@@ -1,11 +1,9 @@
-try:
-    import datetime
-except:
-    import adafruit_datetime as datetime
+import datetime
 
 import requests
 
 from location import Location
+
 
 def sunrise_sunset_json(date: datetime.date, loc: Location):
     time_data = _call_api_sunrise_sunset_org(str(date), loc.lat, loc.long, loc.tzid)

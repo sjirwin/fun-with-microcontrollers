@@ -2,10 +2,14 @@ import board
 import collections
 import displayio
 import math
+import rtc
 import time
+
+from tzdb import timezone
 
 import adafruit_itertools as itertools
 
+from adafruit_datetime import datetime
 from adafruit_display_shapes.arc import Arc
 from adafruit_display_shapes.circle import Circle
 from adafruit_display_shapes.triangle import Triangle
@@ -39,15 +43,20 @@ IndicatorPoints = collections.namedtuple(
 )
 
 
+def localtime(tzid: str = LOCATION.tzid) -> datetime:
+    utc_now_dt = datetime.fromtimestamp(time.time())
+    return utc_now_dt + timezone(tzid).utcoffset(utc_now_dt)
+
+
 def now_angle() -> float:
     '''
     Calculate the angle around the clock face (in radians) for the current time
 
     Midnight is pi/2 radians
     '''
-    now = my_rtc.current_time(board.I2C())
-    secs_now = now.tm_sec + 60 * (now.tm_min + (60 * now.tm_hour))
-    return (2 * math.pi * secs_now / TOTAL_SECONDS) - (math.pi / 2)
+    now = localtime()
+    secs_now = now.second + 60 * (now.minute + (60 * now.hour))
+    return (2 * math.pi * secs_now / TOTAL_SECONDS)
 
 
 def now_pts(angle: float, radius: float) -> IndicatorPoints:
@@ -60,7 +69,7 @@ def now_pts(angle: float, radius: float) -> IndicatorPoints:
     return IndicatorPoints(x0, y0, x1, y1, x2, y2)
 
 
-def create_arcs(date, location: Location, radius: float):
+def create_arcs(date, location: Location, radius: float) -> list[Arc]:
     # time of each solar day event for date and location
     events = sun_events.sunevents(date, location)
 
@@ -74,7 +83,7 @@ def create_arcs(date, location: Location, radius: float):
     # calculate parameters needed to draw the arcs
     arc_colors = [BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, LIGHT_GREY, GREY, DARK_GREY, BLACK]
     arc_directions = [
-        (360 * (start + mid) / TOTAL_SECONDS) + 90
+        360 * (start + mid) / TOTAL_SECONDS
         for start, mid
         in zip(arc_start_pts, arc_mid_pts)
     ]
@@ -98,7 +107,26 @@ def create_arcs(date, location: Location, radius: float):
     return arcs
 
 
+def arc_group(arcs: list[Arc]) -> displayio.Group:
+    group = displayio.Group()
+    for arc in arcs:
+        group.append(arc)
+    return group
+
+
+def indicator_group(pts: IndicatorPoints, x: float, y: float) -> displayio.Group:
+    group = displayio.Group()
+    indicator = Triangle(pts.x0, pts.y0, pts.x1, pts.y1, pts.x2, pts.y2, fill=BLUE, outline=BLUE)
+    group.append(indicator)
+    center_dot = Circle(x, y, 5, fill=WHITE, outline=BLACK, stroke=3)
+    group.append(center_dot)
+    return group
+
+
 # ----------------------------------------------------
+
+# use the external real-time clock (RTC) initialize the local RTC
+rtc.RTC().datetime = my_rtc.current_utc_time(i2c=board.I2C())
 
 # Release any resources currently in use for the displays
 displayio.release_displays()
@@ -110,13 +138,13 @@ display = my_display.get_display(board)
 w2 = display.width // 2
 h2 = display.height // 2
 
-radius = 0.9 * h2
+radius = 0.95 * h2
 
 # create group for display
 group = displayio.Group()
 display.root_group = group
 
-# background
+# set the background
 color_bitmap = displayio.Bitmap(display.width, display.height, 1)
 color_palette = displayio.Palette(1)
 color_palette[0] = NEAR_BLACK
@@ -126,58 +154,41 @@ group.append(bg)
 # ----------------------------------------------------
 
 # current date
-date = my_rtc.current_date(board.I2C())
+date = localtime().date()
 
 # arcs for each solar day events
 arcs = create_arcs(date, LOCATION, radius)
 
-# add arcs to display group
-for arc in arcs:
-    group.append(arc)
+# add arcs display group
+group.append(arc_group(arcs))
 
 # sun dial time indicator
 angle = now_angle()
 pts = now_pts(angle=angle, radius=radius)
 
-indicator = Triangle(pts.x0, pts.y0, pts.x1, pts.y1, pts.x2, pts.y2, fill=BLUE, outline=BLUE)
-group.append(indicator)
-
-# decorative dot in the center
-center_dot = Circle(w2, h2, 5, fill=WHITE, outline=BLACK, stroke=3)
-group.append(center_dot)
+# add indicator display group
+group.append(indicator_group(pts, w2, h2))
 
 previous_date = date
-previous_arcs = arcs
 previous_pts = pts
-previous_indicator = indicator
 
 while True:
     # wait a minute
     time.sleep(60.0)
 
-    date = my_rtc.current_date(board.I2C())
+    date = localtime().date()
 
-    # if new date, update the arcs
+    # if new date, update the arc display group
     if date > previous_date:
         arcs = create_arcs(date, LOCATION, radius)
-
-        for new_arc, prev_arc in zip(arcs, previous_arcs):
-            indx = group.index(prev_arc)
-            group[indx] = new_arc
-            del prev_arc
-
+        group[1] = arc_group(arcs)
         previous_date = date
-        previous_arcs = arcs
 
+    # calculate the coordinates for the indicator
     angle = now_angle()
     pts = now_pts(angle=angle, radius=radius)
 
-    # if the pts have changed, update the indicator
+    # if the pts have changed, update the indicator display group
     if pts != previous_pts:
-        indicator = Triangle(pts.x0, pts.y0, pts.x1, pts.y1, pts.x2, pts.y2, fill=BLUE, outline=BLUE)
-        indx = group.index(previous_indicator)
-        group[indx] = indicator
-        del previous_indicator
-
+        group[2] = indicator_group(pts, w2, h2)
         previous_pts = pts
-        previous_indicator = indicator

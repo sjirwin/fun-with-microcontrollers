@@ -6,7 +6,7 @@ except:
 from location import Location
 
 try:
-    import sun_events_data_network as events_data
+    import sun_events_data_board as events_data
 except:
     import sun_events_data_static as events_data
 
