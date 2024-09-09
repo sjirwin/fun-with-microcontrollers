@@ -52,26 +52,27 @@ def now_angle() -> float:
     '''
     Calculate the angle around the clock face (in radians) for the current time
 
-    Midnight is 3π/2 radians
+    Midnight is π/2 radians
     '''
     now = localtime()
     secs_now = now.second + 60 * (now.minute + (60 * now.hour))
-    return (2 * math.pi * secs_now / TOTAL_SECONDS) + (3 * math.pi / 2)
+    return (2 * math.pi * secs_now / TOTAL_SECONDS) - (math.pi / 2)
 
 
 def now_pts(angle: float, radius: float) -> IndicatorPoints:
-    x0 = int((0.9 * radius) * math.cos(angle)) + w2
-    y0 = int((0.9 * radius) * math.sin(angle)) + h2
-    x1 = int((0.2 * radius) * math.cos(angle + math.pi + .05)) + w2
-    y1 = int((0.2 * radius) * math.sin(angle + math.pi + .05)) + h2
-    x2 = int((0.2 * radius) * math.cos(angle + math.pi - .05)) + w2
-    y2 = int((0.2 * radius) * math.sin(angle + math.pi - .05)) + h2
+    x0 = int((0.9 * radius) * math.cos(angle)) + W2
+    y0 = int((0.9 * radius) * math.sin(angle)) + H2
+    x1 = int((0.2 * radius) * math.cos(angle + math.pi + .05)) + W2
+    y1 = int((0.2 * radius) * math.sin(angle + math.pi + .05)) + H2
+    x2 = int((0.2 * radius) * math.cos(angle + math.pi - .05)) + W2
+    y2 = int((0.2 * radius) * math.sin(angle + math.pi - .05)) + H2
     return IndicatorPoints(x0, y0, x1, y1, x2, y2)
 
 
-def create_arcs(date, location: Location, radius: float) -> list[Arc]:
+def create_arcs(date: datetime.date, location: Location, radius: float) -> list[Arc]:
     # time of each solar day event for date and location
     events = sun_events.sunevents(date, location)
+    print(f"sunrise: {events.sunrise}, sunset: {events.sunset}")
 
     # calculate duration (in secs) of each solar day event
     durations = event_durations.durations(events)
@@ -83,7 +84,7 @@ def create_arcs(date, location: Location, radius: float) -> list[Arc]:
     # calculate parameters needed to draw the arcs
     arc_colors = [BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, LIGHT_GREY, GREY, DARK_GREY, BLACK]
     arc_directions = [
-        ((360 * (start + mid) / TOTAL_SECONDS) + 90) % 360
+        90 - (360 * (start + mid) / TOTAL_SECONDS)
         for start, mid
         in zip(arc_start_pts, arc_mid_pts)
     ]
@@ -91,8 +92,8 @@ def create_arcs(date, location: Location, radius: float) -> list[Arc]:
 
     arcs = [
         Arc(
-            x=w2,
-            y=h2,
+            x=W2,
+            y=H2,
             radius=radius,
             arc_width=radius,
             angle=angle,
@@ -114,11 +115,11 @@ def arc_group(arcs: list[Arc]) -> displayio.Group:
     return group
 
 
-def indicator_group(pts: IndicatorPoints, x: float, y: float) -> displayio.Group:
+def indicator_group(pts: IndicatorPoints) -> displayio.Group:
     group = displayio.Group()
     indicator = Triangle(pts.x0, pts.y0, pts.x1, pts.y1, pts.x2, pts.y2, fill=BLUE, outline=BLUE)
     group.append(indicator)
-    center_dot = Circle(x, y, 5, fill=WHITE, outline=BLACK, stroke=3)
+    center_dot = Circle(W2, H2, 5, fill=WHITE, outline=BLACK, stroke=3)
     group.append(center_dot)
     return group
 
@@ -135,21 +136,21 @@ displayio.release_displays()
 display = my_display.get_display(board)
 
 # center of the display
-w2 = display.width // 2
-h2 = display.height // 2
+W2 = display.width // 2
+H2 = display.height // 2
 
-radius = 0.95 * h2
+RADIUS = 0.95 * min(W2, H2)
 
 # create group for display
-group = displayio.Group()
-display.root_group = group
+root_group = displayio.Group()
+display.root_group = root_group
 
 # set the background
 color_bitmap = displayio.Bitmap(display.width, display.height, 1)
 color_palette = displayio.Palette(1)
 color_palette[0] = NEAR_BLACK
 bg = displayio.TileGrid(color_bitmap, x=0, y=0, pixel_shader=color_palette)
-group.append(bg)
+root_group.append(bg)
 
 # ----------------------------------------------------
 
@@ -157,17 +158,17 @@ group.append(bg)
 date = localtime().date()
 
 # arcs for each solar day events
-arcs = create_arcs(date, LOCATION, radius)
+arcs = create_arcs(date, LOCATION, RADIUS)
 
 # add arcs display group
-group.append(arc_group(arcs))
+root_group.append(arc_group(arcs))
 
 # sun dial time indicator
 angle = now_angle()
-pts = now_pts(angle=angle, radius=radius)
+pts = now_pts(angle=angle, radius=RADIUS)
 
 # add indicator display group
-group.append(indicator_group(pts, w2, h2))
+root_group.append(indicator_group(pts))
 
 previous_date = date
 previous_pts = pts
@@ -180,17 +181,16 @@ while True:
 
     # if new date, update the arc display group
     if date > previous_date:
-        print(f"{previous_date=} {date=}")
-        arcs = create_arcs(date, LOCATION, radius)
-        group[1] = arc_group(arcs)
+        print(f"{date=}")
+        arcs = create_arcs(date, LOCATION, RADIUS)
+        root_group[1] = arc_group(arcs)
         previous_date = date
 
     # calculate the coordinates for the indicator
     angle = now_angle()
-    pts = now_pts(angle=angle, radius=radius)
+    pts = now_pts(angle=angle, radius=RADIUS)
 
     # if the pts have changed, update the indicator display group
     if pts != previous_pts:
-        print(f"{angle=} ({previous_pts.x0}, {previous_pts.y0}) ({pts.x0}, {pts.y0})")
-        group[2] = indicator_group(pts, w2, h2)
+        root_group[2] = indicator_group(pts)
         previous_pts = pts
