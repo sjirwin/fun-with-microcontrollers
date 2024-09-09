@@ -52,11 +52,11 @@ def now_angle() -> float:
     '''
     Calculate the angle around the clock face (in radians) for the current time
 
-    Midnight is pi/2 radians
+    Midnight is 3π/2 radians
     '''
     now = localtime()
     secs_now = now.second + 60 * (now.minute + (60 * now.hour))
-    return (2 * math.pi * secs_now / TOTAL_SECONDS)
+    return (2 * math.pi * secs_now / TOTAL_SECONDS) + (3 * math.pi / 2)
 
 
 def now_pts(angle: float, radius: float) -> IndicatorPoints:
@@ -83,11 +83,11 @@ def create_arcs(date, location: Location, radius: float) -> list[Arc]:
     # calculate parameters needed to draw the arcs
     arc_colors = [BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, LIGHT_GREY, GREY, DARK_GREY, BLACK]
     arc_directions = [
-        360 * (start + mid) / TOTAL_SECONDS
+        ((360 * (start + mid) / TOTAL_SECONDS) + 90) % 360
         for start, mid
         in zip(arc_start_pts, arc_mid_pts)
     ]
-    arc_angles = [360 * dur / TOTAL_SECONDS for dur in durations]
+    arc_angle_lens = [360 * dur / TOTAL_SECONDS for dur in durations]
 
     arcs = [
         Arc(
@@ -101,7 +101,7 @@ def create_arcs(date, location: Location, radius: float) -> list[Arc]:
             segments=min(10, int(5 * angle))
         )
         for color, direction, angle
-        in zip(arc_colors, arc_directions, arc_angles)
+        in zip(arc_colors, arc_directions, arc_angle_lens)
     ]
 
     return arcs
@@ -180,6 +180,7 @@ while True:
 
     # if new date, update the arc display group
     if date > previous_date:
+        print(f"{previous_date=} {date=}")
         arcs = create_arcs(date, LOCATION, radius)
         group[1] = arc_group(arcs)
         previous_date = date
@@ -190,5 +191,6 @@ while True:
 
     # if the pts have changed, update the indicator display group
     if pts != previous_pts:
+        print(f"{angle=} ({previous_pts.x0}, {previous_pts.y0}) ({pts.x0}, {pts.y0})")
         group[2] = indicator_group(pts, w2, h2)
         previous_pts = pts
