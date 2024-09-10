@@ -30,9 +30,9 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ---
 
-# References
+## References
 
   - This talk: [https://sjirwin.github.io/fun-with-microcontrollers](https://sjirwin.github.io/fun-with-microcontrollers)
   - Project Repo: [https://github.com/sjirwin/fun-with-microcontrollers](https://github.com/sjirwin/fun-with-microcontrollers)
-    - `main` branch: Code
-    - `gh-pages` branch: Slides
+    - Code: `main` branch
+    - Slides: `gh-pages`
