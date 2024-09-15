@@ -22,26 +22,36 @@ import event_durations
 from location import Location
 
 
-# Brooklyn, NY, USA
-LOCATION = Location(40.6928, -73.9903, 'America/New_York')
+# helpful data structure for holding the triangle points for the time indicator
+IndicatorPoints = collections.namedtuple(
+    'IndicatorPoints',
+    ('x0', 'y0', 'x1', 'y1', 'x2', 'y2')
+)
+
+
+# ----------------------------------------------------
+# some constants
+
+BROOKLYN_NY_USA = Location(40.6928, -73.9903, 'America/New_York')
+TOKYO_JAPAN = Location(35.6897, 139.6922, 'Asia/Tokyo')
+
+LOCATION = BROOKLYN_NY_USA
 
 # number of seconds in a day
 TOTAL_SECONDS = 24 * 60 * 60
 
 # colors used
 WHITE = 0xFFFFFF
-LIGHT_GREY = 0xAAAAAA
+LIGHT_GREY = 0xBBBBBB
 GREY = 0x888888
-DARK_GREY = 0x333333
+DARK_GREY = 0x666666
 BLACK = 0x000000
 NEAR_BLACK = 0x111111
 BLUE = 0x0000FF
 
-IndicatorPoints = collections.namedtuple(
-    'IndicatorPoints',
-    ('x0', 'y0', 'x1', 'y1', 'x2', 'y2')
-)
 
+# ----------------------------------------------------
+# helper functions
 
 def localtime(tzid: str = LOCATION.tzid) -> datetime:
     utc_now_dt = datetime.fromtimestamp(time.time())
@@ -124,50 +134,54 @@ def indicator_group(pts: IndicatorPoints) -> displayio.Group:
     return group
 
 
-# ----------------------------------------------------
+def display_background(display) -> displayio.TileGrid:
+    color_bitmap = displayio.Bitmap(display.width, display.height, 1)
+    color_palette = displayio.Palette(1)
+    color_palette[0] = NEAR_BLACK
+    return displayio.TileGrid(color_bitmap, x=0, y=0, pixel_shader=color_palette)
 
-# use the external real-time clock (RTC) initialize the local RTC
+
+# ====================================================
+# Main program starts here
+# ====================================================
+
+# use the external real-time clock (RTC) to initialize the local RTC
 rtc.RTC().datetime = my_rtc.current_utc_time(i2c=board.I2C())
-
-# Release any resources currently in use for the displays
-displayio.release_displays()
-
-# connect to the display
-display = my_display.get_display(board)
-
-# center of the display
-W2 = display.width // 2
-H2 = display.height // 2
-
-RADIUS = 0.95 * min(W2, H2)
-
-# create group for display
-root_group = displayio.Group()
-display.root_group = root_group
-
-# set the background
-color_bitmap = displayio.Bitmap(display.width, display.height, 1)
-color_palette = displayio.Palette(1)
-color_palette[0] = NEAR_BLACK
-bg = displayio.TileGrid(color_bitmap, x=0, y=0, pixel_shader=color_palette)
-root_group.append(bg)
-
-# ----------------------------------------------------
 
 # current date
 date = localtime().date()
 
+# Release any resources currently in use for the display
+displayio.release_displays()
+
+# connect the board to the display
+display = my_display.get_display(board)
+
+# define the center of the display
+W2 = display.width // 2
+H2 = display.height // 2
+
+# size of the digital sundial
+RADIUS = 0.95 * min(W2, H2)
+
+# create the top level display group
+root_group = displayio.Group()
+display.root_group = root_group
+
+# set the background
+root_group.append(display_background(display))
+
 # arcs for each solar day events
 arcs = create_arcs(date, LOCATION, RADIUS)
 
-# add arcs display group
+# add arcs to display group
 root_group.append(arc_group(arcs))
 
 # sun dial time indicator
 angle = now_angle()
 pts = now_pts(angle=angle, radius=RADIUS)
 
-# add indicator display group
+# add indicator to display group
 root_group.append(indicator_group(pts))
 
 previous_date = date
