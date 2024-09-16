@@ -410,13 +410,19 @@ while True:
 
 ------
 
-## Working Title
+## Summary
+
+- Python provides an easy way to get started programming embedded systems
+- With some data, a small amount of microcontroller hardware, and a bit of Python, was able to build a portable IoT device with a graphical display
 
 ------
 
-## What is Missing
+## Possible Enhancements
 
-- GPS to get current location
+- Show date on screen
+- Add hash marks to show hour on sun dial face
+- Add GPS to get current location
+  - Requires external antenna
 
 ------
 
