@@ -178,8 +178,7 @@ arcs = create_arcs(date, LOCATION, RADIUS)
 root_group.append(arc_group(arcs))
 
 # sun dial time indicator
-angle = now_angle()
-pts = now_pts(angle=angle, radius=RADIUS)
+pts = now_pts(now_angle(), RADIUS)
 
 # add indicator to display group
 root_group.append(indicator_group(pts))
@@ -201,8 +200,7 @@ while True:
         previous_date = date
 
     # calculate the coordinates for the indicator
-    angle = now_angle()
-    pts = now_pts(angle=angle, radius=RADIUS)
+    pts = now_pts(now_angle(), RADIUS)
 
     # if the pts have changed, update the indicator display group
     if pts != previous_pts:
