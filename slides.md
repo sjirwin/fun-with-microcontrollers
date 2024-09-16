@@ -278,18 +278,19 @@ def get_display(board):
 ## Initial graphical elements
 
 ```python
+# create the top level display group
+root_group = displayio.Group()
+display.root_group = root_group
+
 # set the background
 root_group.append(display_background(display))
 
 # arcs for solar day events
 arcs = create_arcs(date, LOCATION, RADIUS)
-# add arcs to display group
 root_group.append(arc_group(arcs))
 
 # sun dial time indicator
-angle = now_angle()
-pts = now_pts(angle=angle, radius=RADIUS)
-# add indicator to display group
+pts = now_pts(angle=now_angle(), radius=RADIUS)
 root_group.append(indicator_group(pts))
 ```
 
@@ -383,8 +384,7 @@ while True:
         root_group[1] = arc_group(arcs)
         previous_date = date
     # calculate the coordinates for the indicator
-    angle = now_angle()
-    pts = now_pts(angle=angle, radius=RADIUS)
+    pts = now_pts(angle=now_angle(), radius=RADIUS)
     # if the pts have changed, update the indicator display group
     if pts != previous_pts:
         root_group[2] = indicator_group(pts)
