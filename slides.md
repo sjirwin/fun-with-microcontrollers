@@ -104,7 +104,7 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ## Requirements
 
-- Microcontroller board thatsupport Python
+- Microcontroller board that supports  Python
 - Display
 - Real-time Clock (RTC)
   - Maintains the date/time while system is powered off
@@ -135,8 +135,9 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 - Fork of MicroPython
   - Beginner friendly
+- Integrated into boot loader for the microcontroler board
 - Large number of modules available
-- Seperate distribution for each microcontroler board
+- Seperate boot loader for each board
   - Not all of CPython modules supported
 
 ------
@@ -156,7 +157,7 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ## Additional Modules
 
-- `adafruit_datetime`, `tzdb`, `adafruit_itertools`
+- `tzdb`,  `adafruit_datetime`, `adafruit_itertools`
 - **RTC:** `adafruit_ds3231`, `adafruit_register`
 - **Display:** `adafruit_hx8357`, `adafruit_display_shapes`
 - **Wifi:** `adafruit_connection_manager`, `adafruit_requests`
@@ -292,6 +293,18 @@ root_group.append(arc_group(arcs))
 # sun dial time indicator
 pts = now_pts(angle=now_angle(), radius=RADIUS)
 root_group.append(indicator_group(pts))
+```
+
+------
+
+## `arc_group()`
+
+```python
+def arc_group(arcs: list[Arc]) -> displayio.Group:
+    group = displayio.Group()
+    for arc in arcs:
+        group.append(arc)
+    return group
 ```
 
 ------
