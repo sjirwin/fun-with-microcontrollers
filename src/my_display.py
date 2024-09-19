@@ -2,7 +2,7 @@ import displayio
 import adafruit_hx8357
 
 
-def get_display(board):
+def display(board):
     # board details needed to talk to the display
     spi = board.SPI() # Serial Peripheral Interface (used for synchronous serial communication)
     tft_cs = board.D9 # Chip Select pin for the display
@@ -15,10 +15,10 @@ def get_display(board):
         chip_select=tft_cs,
     )
 
-    display_width = 480
-    display_height = 320
+    width = 480
+    height = 320
 
-    display = adafruit_hx8357.HX8357(display_bus, width=display_width, height=display_height)
+    display = adafruit_hx8357.HX8357(display_bus, width=width, height=height)
 
     return display
 

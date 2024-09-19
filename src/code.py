@@ -54,6 +54,7 @@ BLUE = 0x0000FF
 # helper functions
 
 def localtime(tzid: str = LOCATION.tzid) -> datetime:
+    """Gets UTC from the on-board RTC and does the timezome adjustment"""
     utc_now_dt = datetime.fromtimestamp(time.time())
     return utc_now_dt + timezone(tzid).utcoffset(utc_now_dt)
 
@@ -61,7 +62,6 @@ def localtime(tzid: str = LOCATION.tzid) -> datetime:
 def now_angle() -> float:
     '''
     Calculate the angle around the clock face (in radians) for the current time
-
     Midnight is π/2 radians
     '''
     now = localtime()
@@ -70,8 +70,11 @@ def now_angle() -> float:
 
 
 def now_pts(angle: float, radius: float) -> IndicatorPoints:
+    """Calculate the 3 vertices of the time indicator triangle"""
+    # triangle tip
     x0 = int((0.9 * radius) * math.cos(angle)) + W2
     y0 = int((0.9 * radius) * math.sin(angle)) + H2
+    # triangle base
     x1 = int((0.2 * radius) * math.cos(angle + math.pi + .05)) + W2
     y1 = int((0.2 * radius) * math.sin(angle + math.pi + .05)) + H2
     x2 = int((0.2 * radius) * math.cos(angle + math.pi - .05)) + W2
@@ -80,6 +83,12 @@ def now_pts(angle: float, radius: float) -> IndicatorPoints:
 
 
 def create_arcs(date: datetime.date, location: Location, radius: float) -> list[Arc]:
+    """
+    Create the Arc graphical elements.
+    Each arc represent a portion of the solar day (e.g., civil twilight). The starting
+    time of each of those solar day events comes from sun_events.sunevents()
+    """
+
     # time of each solar day event for date and location
     events = sun_events.sunevents(date, location)
     print(f"sunrise: {events.sunrise}, sunset: {events.sunset}")
@@ -88,37 +97,42 @@ def create_arcs(date: datetime.date, location: Location, radius: float) -> list[
     durations = event_durations.durations(events)
 
     # data needed to calculate arc paramters
+    # - start_pts is how many seconds into the day and event starts
+    # - mid_pts is the middle point of the solar day event
     arc_start_pts = list(itertools.accumulate([0]+durations, func=lambda x, y: x + y))
     arc_mid_pts = [d // 2 for d in durations]
 
-    # calculate parameters needed to draw the arcs
+    # calculate parameters needed to draw the arcs; to create the arc we need to calculate:
+    # - the direction (degree angle) of the arc's mid-point
+    # - the length (in degrees) of the arc
     arc_colors = [BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE, LIGHT_GREY, GREY, DARK_GREY, BLACK]
     arc_directions = [
         90 - (360 * (start + mid) / TOTAL_SECONDS)
         for start, mid
         in zip(arc_start_pts, arc_mid_pts)
     ]
-    arc_angle_lens = [360 * dur / TOTAL_SECONDS for dur in durations]
+    arc_lengths = [360 * dur / TOTAL_SECONDS for dur in durations]
 
     arcs = [
         Arc(
             x=W2,
             y=H2,
-            radius=radius,
-            arc_width=radius,
-            angle=angle,
-            direction=direction,
+            radius=radius, # the arc's distance from the center
+            arc_width=radius, # how much of the arc to color fill
+            angle=angle, # length of the arc (in degrees)
+            direction=direction, # direction of the arc's mid-point (in degrees)
             fill=color,
             segments=min(10, int(5 * angle))
         )
         for color, direction, angle
-        in zip(arc_colors, arc_directions, arc_angle_lens)
+        in zip(arc_colors, arc_directions, arc_lengths)
     ]
 
     return arcs
 
 
 def arc_group(arcs: list[Arc]) -> displayio.Group:
+    """Creates a dispaly group and adds the arcs to it"""
     group = displayio.Group()
     for arc in arcs:
         group.append(arc)
@@ -126,15 +140,20 @@ def arc_group(arcs: list[Arc]) -> displayio.Group:
 
 
 def indicator_group(pts: IndicatorPoints) -> displayio.Group:
+    """Create the graphic elements for the time indicator"""
+    # new display group
     group = displayio.Group()
+    # use a triangle for the time indicator
     indicator = Triangle(pts.x0, pts.y0, pts.x1, pts.y1, pts.x2, pts.y2, fill=BLUE, outline=BLUE)
     group.append(indicator)
+    # add a small dot in the center of the display (W2, H2)
     center_dot = Circle(W2, H2, 5, fill=WHITE, outline=BLACK, stroke=3)
     group.append(center_dot)
     return group
 
 
 def display_background(display) -> displayio.TileGrid:
+    """Create a very dark grey Tile to be used as the display background"""
     color_bitmap = displayio.Bitmap(display.width, display.height, 1)
     color_palette = displayio.Palette(1)
     color_palette[0] = NEAR_BLACK
@@ -155,7 +174,7 @@ date = localtime().date()
 displayio.release_displays()
 
 # connect the board to the display
-display = my_display.get_display(board)
+display = my_display.display(board)
 
 # define the center of the display
 W2 = display.width // 2
