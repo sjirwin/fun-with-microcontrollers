@@ -171,7 +171,7 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 - Fork of MicroPython
   - Beginner friendly
-- Integrated into boot loader for the microcontroler board
+- Integrated into boot loader for the microcontroller board
   - Separate boot loader for each board ([example](https://circuitpython.org/board/adafruit_feather_esp32s2/))
 - Large number of modules available
 
