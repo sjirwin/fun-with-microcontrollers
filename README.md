@@ -10,10 +10,10 @@ The `main` branch contains code that was written for an IoT project. All code in
 
 The code assumes the following hardware
 
-|   |   |   |
+|  Component |  Name |   |
 | --- | --- | --- |
 | Microcontroller Board | [Adafruit ESP32-S2 Feather](https://www.adafruit.com/product/5303) | Built-in Wi-Fi |
 | RTC | [DS3231 Precision RTC FeatherWing](https://www.adafruit.com/product/3028) | |
 | Display | [Adafruit TFT FeatherWing 3.5" V2](https://www.adafruit.com/product/3651) | 480x320 pixels |
 
-[This slide](https://sjirwin.github.io/fun-with-microcontrollers/#/1/1) shows the dispaly of the completed project.
+[This slide](https://sjirwin.github.io/fun-with-microcontrollers/#/1/1) shows the screen of the completed project.
