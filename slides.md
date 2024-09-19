@@ -31,8 +31,8 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ## What We Are Building
 
-<img src="images/sundial-photo.png"
-     style="border: none; box-shadow: none; height: 500px"
+<img src="images/sundial-photo.jpg"
+     style="border: none; box-shadow: none; height: 800px"
      alt="Small TFT LED screen displaying a circle divided into 8 segments with each segment representing a portion of the day. Also displayed is a single clock hand indicating the current time."
 />
 
@@ -55,6 +55,7 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 - Using API provided by https://sunrise-sunset.org/
   - They have a simple, free REST API
   - Usage limited to "reasonable volume"
+    - We only need the data once per day and when the device starts up
   - **They require that you show attribution to them with a link to their site**
 
 ------
@@ -72,7 +73,7 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ## Sample data
 
-```text
+```js
 {
   'astronomical_twilight_begin': '2024-08-24T04:36:51-04:00',
   'astronomical_twilight_end': '2024-08-24T21:19:26-04:00',
@@ -96,6 +97,15 @@ https://sjirwin.github.io/fun-with-microcontrollers/
      alt="A circle divided into 8 segments with each segment representing a portion of the day. At the boundry point of each segment is an annotation labeling which part of the solar day it represents."
 />
 
+------
+
+## Displaying The Data
+
+<img src="images/sundial-photo.jpg"
+     style="border: none; box-shadow: none; height: 800px"
+     alt="Small TFT LED screen displaying a circle divided into 8 segments with each segment representing a portion of the day. Also displayed is a single clock hand indicating the current time."
+/>
+
 ===
 
 # Hardware
@@ -113,21 +123,31 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ------
 
-## Hardware Chosen
+## Hardware Chosen - Adafruit Feather boards
 
-- Adafruit Feather boards
-  - Reduced the soldering needed
-  - Boards are designed to be stacked
-- [Adafruit ESP32-S2 Feather](https://www.adafruit.com/product/5303)
-  - CircuitPython support
-  - Built-in wifi
-- [DS3231 Precision RTC FeatherWing](https://www.adafruit.com/product/3028)
-- [Adafruit TFT FeatherWing 3.5" V2](https://www.adafruit.com/product/3651)
-  - 480x320 pixels
+<br/>
+
+| Component Type | Name |   |
+| --- | --- | --- |
+| Microcontroller Board | [Adafruit ESP32-S2 Feather](https://www.adafruit.com/product/5303) | Built-in wifi |
+| RTC | [DS3231 Precision RTC FeatherWing](https://www.adafruit.com/product/3028) | |
+| Display | [Adafruit TFT FeatherWing 3.5" V2](https://www.adafruit.com/product/3651) | 480x320 pixels |
 
 ===
 
 # Python
+
+------
+
+## Python On Microcontroller Boards
+
+- The Fun Part
+  - Direct access to board
+- Limitations
+  - Some Python Standard Library modules are not available
+    - Example: <span style="color:indianred">`dataclasses`</span>
+  - Some modules require special versions
+    - Example: <span style="color:indianred">`adafruit_datetime`</span>
 
 ------
 
@@ -136,31 +156,30 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 - Fork of MicroPython
   - Beginner friendly
 - Integrated into boot loader for the microcontroler board
+  - Separate boot loader for each board ([example](https://circuitpython.org/board/adafruit_feather_esp32s2/))
 - Large number of modules available
-- Seperate boot loader for each board
-  - Not all of CPython modules supported
 
 ------
 
 ## ESP32-S2 - Modules Included
 
 - Standard Library
-  - `collections`, `math`, `ssl`, `time`
-  - `os` (`os.getenv`)
+  - <span style="color:indianred">`collections`</span>, <span style="color:indianred">`math`</span>, <span style="color:indianred">`ssl`</span>, <span style="color:indianred">`time`</span>
+  - <span style="color:indianred">`os`</span> (<span style="color:indianred">`os.getenv`</span>)
 - CircuitPython Libraries
-  - `adafruit_bus_device` (needed to talk to FeatherWings)
-  - `displayio`, `fourwire`
-  - `rtc`
-  - `socketpool`, `wifi`
+  - <span style="color:indianred">`adafruit_bus_device`</span> (needed to talk to FeatherWings)
+  - <span style="color:indianred">`displayio`</span>, <span style="color:indianred">`fourwire`</span>
+  - <span style="color:indianred">`rtc`</span>
+  - <span style="color:indianred">`socketpool`</span>, <span style="color:indianred">`wifi`</span>
 
 ------
 
 ## Additional Modules
 
-- `tzdb`,  `adafruit_datetime`, `adafruit_itertools`
-- **RTC:** `adafruit_ds3231`, `adafruit_register`
-- **Display:** `adafruit_hx8357`, `adafruit_display_shapes`
-- **Wifi:** `adafruit_connection_manager`, `adafruit_requests`
+- <span style="color:indianred">`tzdb`</span>,  <span style="color:indianred">`adafruit_datetime`</span>, <span style="color:indianred">`adafruit_itertools`</span>
+- **RTC:** <span style="color:indianred">`adafruit_ds3231`</span>, <span style="color:indianred">`adafruit_register`</span>
+- **Display:** <span style="color:indianred">`adafruit_hx8357`</span>, <span style="color:indianred">`adafruit_display_shapes`</span>
+- **Wifi:** <span style="color:indianred">`adafruit_connection_manager`</span>, <span style="color:indianred">`adafruit_requests`</span>
 
 ------
 
