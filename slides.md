@@ -207,12 +207,12 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 - Built into CircuitPython
 - Provides access to board-specific objects
-  - Serial communication buses
-    - <span style="color:darkgreen">`board.I2C()`</span> : I2C serial bus
-    - <span style="color:darkgreen">`board.SPI()`</span> : Serial Peripheral Interface
-  - Pins
+  - Individual pins
     - <span style="color:darkgreen">`board.D9`</span>
     - <span style="color:darkgreen">`board.D10`</span>
+  - Protocol busses
+    - <span style="color:darkgreen">`board.I2C()`</span> : I2C serial bus
+    - <span style="color:darkgreen">`board.SPI()`</span> : Serial Peripheral Interface
 
 ------
 
