@@ -206,7 +206,7 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 ## <span style="color:indianred">`board`</span> Module
 
 - Built into CircuitPython
-- Provide access to board-specific objects
+- Provides access to board-specific objects
   - Serial communication buses
     - <span style="color:darkgreen">`board.I2C()`</span> : I2C serial bus
     - <span style="color:darkgreen">`board.SPI()`</span> : Serial Peripheral Interface
