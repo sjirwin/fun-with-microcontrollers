@@ -195,11 +195,16 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ## Some Additional Modules
 
-- **General:** <span style="color:indianred">`adafruit_itertools`</span>
-- **Datetime** <span style="color:indianred">`tzdb`</span>,  <span style="color:indianred">`adafruit_datetime`</span>,
-- **RTC:** <span style="color:indianred">`adafruit_ds3231`</span>, <span style="color:indianred">`adafruit_register`</span>
-- **Display:** <span style="color:indianred">`adafruit_hx8357`</span>, <span style="color:indianred">`adafruit_display_shapes`</span>
-- **Wi-Fi:** <span style="color:indianred">`adafruit_connection_manager`</span>, <span style="color:indianred">`adafruit_requests`</span>
+- **General**
+  - <span style="color:indianred">`adafruit_itertools`</span>
+- **Datetime**
+  - <span style="color:indianred">`tzdb`</span>,  <span style="color:indianred">`adafruit_datetime`</span>
+- **RTC**
+  - <span style="color:indianred">`adafruit_ds3231`</span>, <span style="color:indianred">`adafruit_register`</span>
+- **Display**
+  - <span style="color:indianred">`adafruit_hx8357`</span>, <span style="color:indianred">`adafruit_display_shapes`</span>
+- **Wi-Fi**
+  - <span style="color:indianred">`adafruit_connection_manager`</span>, <span style="color:indianred">`adafruit_requests`</span>
 
 ------
 
