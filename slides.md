@@ -205,16 +205,14 @@ https://sjirwin.github.io/fun-with-microcontrollers/
 
 ## <span style="color:indianred">`board`</span> Module
 
-- Access to microcontroller specific functionality
+- Built into CircuitPython
+- Provide access to board-specific objects
   - Serial communication buses
     - <span style="color:darkgreen">`board.I2C()`</span> : I2C serial bus
     - <span style="color:darkgreen">`board.SPI()`</span> : Serial Peripheral Interface
   - Pins
     - <span style="color:darkgreen">`board.D9`</span>
     - <span style="color:darkgreen">`board.D10`</span>
-  - Driver modules
-    - <span style="color:indianred">`rtc`</span> : on-board RTC
-    - <span style="color:indianred">`wifi`</span> : on-board Wi-Fi
 
 ------
 
