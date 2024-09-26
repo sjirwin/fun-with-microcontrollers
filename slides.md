@@ -260,7 +260,7 @@ display_bus = displayio.FourWire(board.SPI(), chip_select=board.D9, command=boar
 - Get current date
 - Initialize display
 - Create and show initial graphical elements
-  - Solar day segemnts
+  - Solar day segments
   - Time indicator
 - Loop forever
   - Update time indicator
